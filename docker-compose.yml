@@ -1,0 +1,32 @@
+version: "3"
+
+services:
+  app:
+    image: yiisoftware/yii2-php:7.3-fpm
+    volumes:
+      - ./:/app
+    depends_on:
+      - db
+
+  nginx:
+    image: nginx:1.12-alpine
+    ports:
+      - 80:80
+    volumes:
+      - ./:/app
+      - ./docker/nginx/vhost.conf:/etc/nginx/conf.d/vhost.conf
+    depends_on:
+      - app
+
+  db:
+    image: mysql:5.7
+    volumes:
+      - /var/lib/mysql
+      - ./docker/mysql/config.cnf:/etc/mysql/conf.d/config.cnf
+    ports:
+       - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: yii
+      MYSQL_USER: root
+      MYSQL_PASSWORD: secret
