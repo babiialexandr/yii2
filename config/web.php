@@ -12,6 +12,13 @@ $config = [
         '@npm'   => '@vendor/npm-asset',
     ],
     'components' => [
+        'view' => [
+            'theme' => [
+                'pathMap' => [
+                    '@dektrium/user/views/admin' => '@app/views/user/admin'
+                ],
+            ],
+        ],
         'request' => [
             'cookieValidationKey' => 'IudhfSdhfbj663djSSa',
         ],
@@ -25,9 +32,16 @@ $config = [
         'errorHandler' => [
             'errorAction' => 'site/error',
         ],
+        'authManager' => [
+            'class' => 'yii\rbac\DbManager',
+        ],
         'mailer' => [
             'class' => 'yii\swiftmailer\Mailer',
-            'useFileTransport' => true,
+            'transport' => [
+                'class' => 'Swift_SmtpTransport',
+                'host' => 'smtp',
+                'port' => 1025,
+            ],
         ],
         'log' => [
             'traceLevel' => YII_DEBUG ? 3 : 0,
@@ -43,7 +57,7 @@ $config = [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
-                '/' => 'site/index',
+                '/' => 'message/index',
                 '<module:w+>' => '<module>',
                 '<module:w+>/<controller:w+>' => '<module>/<controller>',
                 '<module:w+>/<controller:w+>/<action:w+>' => '<module>/<controller>/<action>',
@@ -55,6 +69,7 @@ $config = [
         'user' => [
             'class' => 'dektrium\user\Module',
             'enableFlashMessages' => false,
+            'enableConfirmation' => false,
             'adminPermission' => 'admin',
             'confirmWithin' => 21600,
             'admins' => ['admin'],
@@ -70,6 +85,10 @@ $config = [
                             ]
                         ],
                     ],
+                    'on ' . \dektrium\user\controllers\AdminController::EVENT_AFTER_UPDATE => [
+                        \app\listeners\UserListener::class,
+                        'adminAssignRole'
+                    ],
                 ],
                 'security' => [
                     'class' => 'dektrium\user\controllers\SecurityController',
@@ -80,6 +99,10 @@ $config = [
                         Yii::$app->response->redirect(['/user/security/login'])->send();
                         Yii::$app->end();
                     },
+                    'on ' . \dektrium\user\controllers\RegistrationController::EVENT_AFTER_REGISTER => [
+                        \app\listeners\UserListener::class,
+                        'registerAssignRole'
+                    ],
                 ],
                 'recovery' => [
                     'class' => 'dektrium\user\controllers\RecoveryController',
@@ -88,6 +111,9 @@ $config = [
                     'class' => 'app\controllers\ProfileController',
                 ],
             ],
+            'modelMap' => [
+                'User' => 'app\models\User',
+            ]
         ],
     ],
 ];
@@ -102,7 +128,7 @@ if (YII_ENV_DEV) {
     $config['bootstrap'][] = 'gii';
     $config['modules']['gii'] = [
         'class' => 'yii\gii\Module',
-        //'allowedIPs' => ['127.0.0.1', '::1'],
+        'allowedIPs' => ['*'],
     ];
 }
 

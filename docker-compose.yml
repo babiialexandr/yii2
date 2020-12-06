@@ -30,3 +30,21 @@ services:
       MYSQL_DATABASE: yii
       MYSQL_USER: root
       MYSQL_PASSWORD: secret
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    links:
+      - db:db
+    ports:
+      - 8000:80
+    environment:
+      MYSQL_USER: root
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: root
+
+  smtp:
+    image: mailhog/mailhog
+    restart: always
+    ports:
+      - 1025:1025
+      - 8025:8025

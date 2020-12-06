@@ -14,6 +14,14 @@ $config = [
         '@tests' => '@app/tests',
     ],
     'components' => [
+        'mailer' => [
+            'class' => 'yii\swiftmailer\Mailer',
+            'transport' => [
+                'class' => 'Swift_SmtpTransport',
+                'host' => 'smtp',
+                'port' => 1025,
+            ],
+        ],
         'cache' => [
             'class' => 'yii\caching\FileCache',
         ],
@@ -25,7 +33,15 @@ $config = [
                 ],
             ],
         ],
+        'authManager' => [
+            'class' => 'yii\rbac\DbManager',
+        ],
         'db' => $db,
+    ],
+    'modules' => [
+        'user' => [
+            'class' => 'dektrium\user\Module',
+        ],
     ],
     'params' => $params,
 ];
